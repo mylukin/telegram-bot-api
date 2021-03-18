@@ -96,22 +96,22 @@ void ClientManager::send(PromisedQueryPtr query) {
       }
     }
     LOG(DEBUG) << "Receive incoming query for new bot " << token << " from " << query->peer_address();
-    if (!ip_address.empty()) {
-      LOG(DEBUG) << "Check Client creation flood control for IP address " << ip_address;
-      auto res = flood_controls_.emplace(std::move(ip_address), td::FloodControlFast());
-      auto &flood_control = res.first->second;
-      if (res.second) {
-        flood_control.add_limit(60, 20);        // 20 in a minute
-        flood_control.add_limit(60 * 60, 600);  // 600 in an hour
-      }
-      td::uint32 now = static_cast<td::uint32>(td::Time::now());
-      td::uint32 wakeup_at = flood_control.get_wakeup_at();
-      if (wakeup_at > now) {
-        LOG(INFO) << "Failed to create Client from IP address " << ip_address;
-        return query->set_retry_after_error(static_cast<int>(wakeup_at - now) + 1);
-      }
-      flood_control.add_event(static_cast<td::int32>(now));
-    }
+    // if (!ip_address.empty()) {
+    //   LOG(DEBUG) << "Check Client creation flood control for IP address " << ip_address;
+    //   auto res = flood_controls_.emplace(std::move(ip_address), td::FloodControlFast());
+    //   auto &flood_control = res.first->second;
+    //   if (res.second) {
+    //     flood_control.add_limit(60, 20);        // 20 in a minute
+    //     flood_control.add_limit(60 * 60, 600);  // 600 in an hour
+    //   }
+    //   td::uint32 now = static_cast<td::uint32>(td::Time::now());
+    //   td::uint32 wakeup_at = flood_control.get_wakeup_at();
+    //   if (wakeup_at > now) {
+    //     LOG(INFO) << "Failed to create Client from IP address " << ip_address;
+    //     return query->set_retry_after_error(static_cast<int>(wakeup_at - now) + 1);
+    //   }
+    //   flood_control.add_event(static_cast<td::int32>(now));
+    // }
 
     auto id = clients_.create(ClientInfo{BotStatActor(stat_.actor_id(&stat_)), token, td::ActorOwn<Client>()});
     auto *client_info = clients_.get(id);
